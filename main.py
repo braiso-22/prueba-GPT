@@ -3,30 +3,61 @@ import dotenv
 from dotenv import load_dotenv
 import openai
 
-
-def initialize_openai():
-    openai.organization = "org-90nlZdVZc1Zg3BvFf3xIVfmD"
-    openai.api_key = dotenv.get_key(".env", "OPENAI_API_KEY")
-    print("OpenAI API Key:", openai.api_key)
+from Assistant import Assistant
+from Message import Message
 
 
-def create_completion(prompt: str):
-    completion = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=100,
-    )
-    return completion
+def fast_completion(assistant: Assistant):
+    while True:
+        message = input("You: ")
+        if message == "":
+            break
+        completion = assistant.create_completion(message)
+        text = completion.choices[0].text
+        print(f"{assistant.name}: {text}")
+
+
+def open_chat(assistant: Assistant):
+    first_message = True
+    while True:
+        if first_message:
+            option = input("Quieres configurar a tu asistente?s/N")
+            message_str = input("Configuracion: ") if option.lower() == "s" else ""
+
+            assistant.initial_configuration(message_str)
+            first_message = not first_message
+
+        message_str = input("You: ")
+        if message_str == "":
+            break
+
+        message = Message("user", message_str)
+        assistant.add_message(message)
+        completion = assistant.send_conversation()
+        text = completion.choices[0].message.content
+        print(f"{assistant.name}: ")
+        [print(text + "\n") for text in text.split(". ")]
+        assistant.add_message(Message(Message.ASSISTANT, text))
 
 
 def main():
-    initialize_openai()
+    assistant = Assistant("Jarvis")
+    menu_options = {
+        "1": fast_completion,
+        "2": open_chat,
+    }
     while True:
-        prompt = input("You: ")
-        if prompt == "":
+        print("1. Simple question")
+        print("2. Chating")
+        print("0. Exit")
+        option = input("Option: ")
+
+        if option == "0":
             break
-        completion = create_completion(prompt)
-        print("AI:", completion.choices[0].text)
+        if option in menu_options:
+            menu_options[option](assistant)
+        else:
+            print("Invalid option")
 
 
 if __name__ == '__main__':
