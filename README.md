@@ -26,6 +26,17 @@ conda env create -f environment.yaml prueba-GPT
 conda activate prueba-GPT
 ```
 
+### Configurar la API
+
+Para poder utilizar la API de GPT-3, es necesario tener una cuenta en [OpenAI](https://openai.com/).
+Una vez creada la cuenta, se debe obtener el token de acceso.
+
+Con el token de acceso, se debe crear un archivo llamado `.env` en la raíz del proyecto, con el siguiente comando:
+
+```bash
+echo "OPENAI_API_KEY=TU_TOKEN_DE_ACCESO" > .env
+```
+
 ## Uso
 
 ### Ejecutar el programa
