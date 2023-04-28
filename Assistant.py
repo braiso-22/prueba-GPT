@@ -1,4 +1,3 @@
-# coding=utf-8
 from typing import List
 import openai
 import getpass
@@ -25,10 +24,13 @@ class Assistant:
 
     def send_conversation(self):
         messages = [message.to_dict() for message in self.messages]
-        chat_completion = self.model.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-        )
+        try:
+            chat_completion = self.model.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+            )
+        except Exception as e:
+            return e
         return chat_completion
 
     def create_completion(self, prompt: str):
@@ -43,10 +45,19 @@ class Assistant:
         if configuration == "":
             configuration = f"Eres una IA llamada {self.name} y tu objetivo  es responder a las preguntas del usuario."
         if self.owner:
-            configuration += f"""El nombre de tu usario es {self.owner}."""
+            configuration += f""" El nombre de tu usario es {self.owner}."""
         clean_input = configuration.replace("\n", "").strip()
         system_message = Message(
             sender=Message.SYSTEM,
             content=clean_input
         )
         self.add_message(system_message)
+
+    def generar_imagen(self, prompt: str):
+        response = self.model.Image.create(
+            prompt=prompt,
+            n=1,
+            size="512x512"
+        )
+        image_url = response['data'][0]['url']
+        return image_url
